@@ -8,9 +8,9 @@ import java.util.List;
 public class ProjetService extends AbstractDatabase<Projet> {
     
     public static void main(String[] args) {
-        
-        ProjetService agentService = new ProjetService();
-        List<Projet>  projets      = agentService.queryList("SELECT * FROM bacasable.projet");
+    
+        ProjetService projetService = new ProjetService();
+        List<Projet>  projets       = projetService.queryList(projetService.query().all());
         System.out.println("projets = " + projets);
     }
 }

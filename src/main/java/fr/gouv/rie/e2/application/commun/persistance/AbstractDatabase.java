@@ -12,6 +12,11 @@ import java.util.List;
 
 public abstract class AbstractDatabase<T> {
     
+    public Query query() {
+        
+        return new Query();
+    }
+    
     public ResultSet queryWithStatement(String query) {
         
         try (Connection connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/bacasable", "postgres", "postgres")) {
@@ -29,14 +34,14 @@ public abstract class AbstractDatabase<T> {
         return null;
     }
     
-    public T queryOne(String query) {
+    public T queryOne(Query query) {
         
         try (Connection connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/bacasable", "postgres", "postgres")) {
             
             Statement statement = connection.createStatement();
             
-            if (query.toLowerCase().startsWith("select")) { return getEntity(statement.executeQuery(query)); }
-            else { statement.executeUpdate(query); }
+            if (query.type == QueryType.SELECT) { return getEntity(statement.executeQuery(query.build())); }
+            else { statement.executeUpdate(query.build()); }
         }
         catch (SQLException e) {
             System.out.println("Query failure.");
@@ -46,14 +51,14 @@ public abstract class AbstractDatabase<T> {
         return null;
     }
     
-    public List<T> queryList(String query) {
+    public List<T> queryList(Query query) {
         
         try (Connection connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/bacasable", "postgres", "postgres")) {
             
             Statement statement = connection.createStatement();
             
-            if (query.toLowerCase().startsWith("select")) { return getEntities(statement.executeQuery(query)); }
-            else { statement.executeUpdate(query); }
+            if (query.type == QueryType.SELECT) { return getEntities(statement.executeQuery(query.build())); }
+            else { statement.executeUpdate(query.build()); }
         }
         catch (SQLException e) {
             System.out.println("Query failure.");
@@ -72,8 +77,9 @@ public abstract class AbstractDatabase<T> {
             Field[] declaredFields = entity.getClass().getDeclaredFields();
             
             for (Field field : declaredFields) {
-                
-                System.out.println();
+    
+                field.setAccessible(true);
+    
                 switch (field.getType().getName()) {
                     case "long":
                         field.set(entity, resultSet.getLong(field.getName()));
@@ -109,7 +115,7 @@ public abstract class AbstractDatabase<T> {
     }
     
     T newInstance() {
-        
+    
         try {
             return (T) ((Class) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0]).newInstance();
         }
@@ -117,7 +123,69 @@ public abstract class AbstractDatabase<T> {
             // TODO : Catcher cette exception correctement !
             e.printStackTrace();
         }
-        
+    
         return null;
+    }
+    
+    protected String getEntityName() {
+        
+        return ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0].getTypeName().replaceFirst(".*\\.", "").toLowerCase();
+    }
+    
+    protected class Query {
+        
+        QueryType type = QueryType.SELECT;
+        private String schema = "bacasable";
+        private String where  = "";
+        
+        public Query all() {
+            
+            type = QueryType.SELECT;
+            schema = "bacasable";
+            where = "";
+            
+            return this;
+        }
+        
+        public Query type(QueryType type) {
+            
+            this.type = type;
+            return this;
+        }
+        
+        public Query schema(String schema) {
+            
+            this.schema = schema;
+            return this;
+        }
+        
+        public Query where(String where) {
+            
+            this.where = where;
+            return this;
+        }
+        
+        protected String build() {
+            
+            String query = "";
+            
+            switch (type) {
+                case SELECT:
+                    query += "SELECT * ";
+                    break;
+                case UPDATE:
+                    query += "UPDATE ";
+                    break;
+                case DELETE:
+                    query += "DELETE ";
+                    break;
+            }
+            
+            query += " FROM " + schema + "." + getEntityName() + " ";
+            
+            if (!where.equals("")) { query += " WHERE " + where; }
+            
+            return query;
+        }
     }
 }

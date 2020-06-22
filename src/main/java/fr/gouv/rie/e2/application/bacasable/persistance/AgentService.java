@@ -10,7 +10,7 @@ public class AgentService extends AbstractDatabase<Agent> {
     public static void main(String[] args) {
         
         AgentService agentService = new AgentService();
-        List<Agent>  agents       = agentService.queryList("SELECT * FROM bacasable.agent");
+        List<Agent>  agents       = agentService.queryList(agentService.query().all());
         System.out.println("agents = " + agents);
     }
 }

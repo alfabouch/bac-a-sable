@@ -1,8 +1,11 @@
 package fr.gouv.rie.e2.application.bacasable.metier;
 
+import lombok.Data;
+
+@Data
 public class Agent {
     
-    public long   id;
-    public String nom;
-    public String prenom;
+    private long   id;
+    private String nom;
+    private String prenom;
 }
