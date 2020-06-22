@@ -58,7 +58,7 @@
                     <tr>
                         <td><c:out value="${projet.id}"/></td>
                         <td><c:out value="${projet.nom}"/></td>
-                        <td><c:out value="${projet.moa.nom}"/> <c:out value="${projet.amoa.prenom}"/></td>
+                        <td><c:out value="${projet.moa.nom}"/> <c:out value="${projet.moa.prenom}"/></td>
                         <td><c:out value="${projet.amoa.nom}"/> <c:out value="${projet.amoa.prenom}"/></td>
                     </tr>
                 </c:forEach>

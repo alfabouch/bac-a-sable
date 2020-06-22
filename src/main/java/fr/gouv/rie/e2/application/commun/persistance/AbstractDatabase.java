@@ -94,7 +94,7 @@ public abstract class AbstractDatabase<T> {
                         field.set(entity, resultSet.getString(field.getName()));
                         break;
                     default:
-                        System.out.println(field.getType().getName());
+//                        System.out.println(field.getType().getName());
                         break;
                 }
             }
