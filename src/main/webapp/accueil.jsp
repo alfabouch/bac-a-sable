@@ -38,6 +38,32 @@
                 </c:forEach>
             </tbody>
         </table>
-    
+        <br/>
+        <br/>
+        <p class="h2 text-center">Projets</p><br/>
+        <table class="table table-striped"
+               style="width: 50%; margin: auto;">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Id</th>
+                    <th>Nom</th>
+                    <th>MOA</th>
+                    <th>AMOA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%--@elvariable id="projets" type="java.util.List<fr.gouv.rie.e2.application.bacasable.metier.Projet>"--%>
+                <c:forEach var="projet"
+                           items="${projets}">
+                    <tr>
+                        <td><c:out value="${projet.id}"/></td>
+                        <td><c:out value="${projet.nom}"/></td>
+                        <td><c:out value="${projet.moa.nom}"/> <c:out value="${projet.amoa.prenom}"/></td>
+                        <td><c:out value="${projet.amoa.nom}"/> <c:out value="${projet.amoa.prenom}"/></td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+
     </body>
 </html>

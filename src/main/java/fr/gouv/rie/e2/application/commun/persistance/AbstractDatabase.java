@@ -9,12 +9,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
 public abstract class AbstractDatabase<T> {
+    
+    protected final Connection connection;
+    
+    public AbstractDatabase(Connection connection) {
+        
+        this.connection = connection;
+    }
     
     public Query query() {
         
@@ -23,7 +25,7 @@ public abstract class AbstractDatabase<T> {
     
     public ResultSet queryWithStatement(String query) {
         
-        try (Connection connection = ((DataSource) ((Context) (new InitialContext().lookup("java:/comp/env"))).lookup("jdbc/bacasable")).getConnection()) {
+        try {
             
             Statement statement = connection.createStatement();
             
@@ -34,29 +36,21 @@ public abstract class AbstractDatabase<T> {
             System.out.println("Query failure.");
             e.printStackTrace();
         }
-        catch (NamingException e) {
-            System.out.println("Database lookup naming error.");
-            e.printStackTrace();
-        }
         
         return null;
     }
     
     public T queryOne(Query query) {
     
-        try (Connection connection = ((DataSource) ((Context) (new InitialContext().lookup("java:/comp/env"))).lookup("jdbc/bacasable")).getConnection()) {
+        try {
         
             Statement statement = connection.createStatement();
         
-            if (query.type == QueryType.SELECT) { return getEntity(statement.executeQuery(query.build())); }
+            if (query.type == QueryType.SELECT) { return getEntities(statement.executeQuery(query.build())).get(0); }
             else { statement.executeUpdate(query.build()); }
         }
         catch (SQLException e) {
             System.out.println("Query failure.");
-            e.printStackTrace();
-        }
-        catch (NamingException e) {
-            System.out.println("Database lookup naming error.");
             e.printStackTrace();
         }
         
@@ -65,7 +59,7 @@ public abstract class AbstractDatabase<T> {
     
     public List<T> queryList(Query query) {
     
-        try (Connection connection = ((DataSource) ((Context) (new InitialContext().lookup("java:/comp/env"))).lookup("jdbc/bacasable")).getConnection()) {
+        try {
         
             Statement statement = connection.createStatement();
         
@@ -76,15 +70,11 @@ public abstract class AbstractDatabase<T> {
             System.out.println("Query failure.");
             e.printStackTrace();
         }
-        catch (NamingException e) {
-            System.out.println("Database lookup naming error.");
-            e.printStackTrace();
-        }
     
         return null;
     }
     
-    public T getEntity(ResultSet resultSet) {
+    public T getEntity(ResultSet resultSet) throws SQLException {
         
         try {
             
@@ -93,9 +83,9 @@ public abstract class AbstractDatabase<T> {
             Field[] declaredFields = entity.getClass().getDeclaredFields();
             
             for (Field field : declaredFields) {
-    
+                
                 field.setAccessible(true);
-    
+                
                 switch (field.getType().getName()) {
                     case "long":
                         field.set(entity, resultSet.getLong(field.getName()));
