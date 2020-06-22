@@ -3,12 +3,16 @@ package fr.gouv.rie.e2.application.commun.persistance;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 public abstract class AbstractDatabase<T> {
     
@@ -19,7 +23,7 @@ public abstract class AbstractDatabase<T> {
     
     public ResultSet queryWithStatement(String query) {
         
-        try (Connection connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/bacasable", "postgres", "postgres")) {
+        try (Connection connection = ((DataSource) ((Context) (new InitialContext().lookup("java:/comp/env"))).lookup("jdbc/bacasable")).getConnection()) {
             
             Statement statement = connection.createStatement();
             
@@ -30,16 +34,20 @@ public abstract class AbstractDatabase<T> {
             System.out.println("Query failure.");
             e.printStackTrace();
         }
+        catch (NamingException e) {
+            System.out.println("Database lookup naming error.");
+            e.printStackTrace();
+        }
         
         return null;
     }
     
     public T queryOne(Query query) {
+    
+        try (Connection connection = ((DataSource) ((Context) (new InitialContext().lookup("java:/comp/env"))).lookup("jdbc/bacasable")).getConnection()) {
         
-        try (Connection connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/bacasable", "postgres", "postgres")) {
-            
             Statement statement = connection.createStatement();
-            
+        
             if (query.type == QueryType.SELECT) { return getEntity(statement.executeQuery(query.build())); }
             else { statement.executeUpdate(query.build()); }
         }
@@ -47,16 +55,20 @@ public abstract class AbstractDatabase<T> {
             System.out.println("Query failure.");
             e.printStackTrace();
         }
+        catch (NamingException e) {
+            System.out.println("Database lookup naming error.");
+            e.printStackTrace();
+        }
         
         return null;
     }
     
     public List<T> queryList(Query query) {
+    
+        try (Connection connection = ((DataSource) ((Context) (new InitialContext().lookup("java:/comp/env"))).lookup("jdbc/bacasable")).getConnection()) {
         
-        try (Connection connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/bacasable", "postgres", "postgres")) {
-            
             Statement statement = connection.createStatement();
-            
+        
             if (query.type == QueryType.SELECT) { return getEntities(statement.executeQuery(query.build())); }
             else { statement.executeUpdate(query.build()); }
         }
@@ -64,7 +76,11 @@ public abstract class AbstractDatabase<T> {
             System.out.println("Query failure.");
             e.printStackTrace();
         }
-        
+        catch (NamingException e) {
+            System.out.println("Database lookup naming error.");
+            e.printStackTrace();
+        }
+    
         return null;
     }
     
@@ -132,7 +148,7 @@ public abstract class AbstractDatabase<T> {
         return ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0].getTypeName().replaceFirst(".*\\.", "").toLowerCase();
     }
     
-    protected class Query {
+    public class Query {
         
         QueryType type = QueryType.SELECT;
         private String schema = "bacasable";
