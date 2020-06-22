@@ -15,7 +15,6 @@
     <body>
         <br/>
         <p class="display-1 text-center">Bac à Sable.</p><br/>
-        <br/>
         <p class="h2 text-center">Agents</p><br/>
         <table class="table table-striped"
                style="width: 50%; margin: auto;">
@@ -38,7 +37,6 @@
                 </c:forEach>
             </tbody>
         </table>
-        <br/>
         <br/>
         <p class="h2 text-center">Projets</p><br/>
         <table class="table table-striped"

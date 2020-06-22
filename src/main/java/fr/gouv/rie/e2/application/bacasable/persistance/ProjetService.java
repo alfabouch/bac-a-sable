@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.github.javafaker.Faker;
+
 public class ProjetService extends AbstractDatabase<Projet> {
     
     public ProjetService(Connection connection) {
@@ -30,9 +32,16 @@ public class ProjetService extends AbstractDatabase<Projet> {
     }
     
     public static void main(String[] args) throws SQLException {
-        
+    
         ProjetService projetService = new ProjetService(DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/bacasable", "postgres", "postgres"));
-        List<Projet>  projets       = projetService.queryList(projetService.query().all());
-        System.out.println("projets = " + projets);
+    
+        projetService.queryWithStatement("TRUNCATE TABLE bacasable.projet CASCADE");
+    
+        Faker faker = new Faker();
+        for (int id = 1; id <= 3; id++) {
+            projetService.queryWithStatement("INSERT INTO bacasable.projet VALUES (" + id + ",'" + faker.app().name() + "'," + (Math.floor(Math.random() * 6) + 1) + "," + (Math.floor(Math.random() * 6) + 1) + ");");
+        }
+        List<Projet> projets = projetService.queryList(projetService.query().all());
+        System.out.println(projets.size());
     }
 }

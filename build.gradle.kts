@@ -15,4 +15,5 @@ dependencies {
     implementation("org.projectlombok:lombok:1.18.12")
     implementation("javax.servlet:javax.servlet-api:4.0.1")
     implementation("javax.servlet:jstl:1.2")
+    implementation("com.github.javafaker:javafaker:1.0.2")
 }
